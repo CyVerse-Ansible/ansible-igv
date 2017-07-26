@@ -1,0 +1,35 @@
+---
+
+- name: Gather OS specific variables
+  include_vars: "{{ item }}"
+  with_first_found:
+    - "{{ ansible_distribution }}-{{ ansible_distribution_major_version}}.yml"
+    - "{{ ansible_distribution }}.yml"
+
+- name: Install Java
+  package:
+    name: "{{ JAVA }}"
+    state: present
+
+- name: Install unzip
+  package:
+    name: unzip
+    state: present
+
+- name: Download IGV
+  get_url:
+    url: "http://data.broadinstitute.org/igv/projects/downloads/IGV_{{ VERSION }}.zip"
+    dest: "/home/{{ ATMOUSERNAME }}/IGV_{{ VERSION }}.zip"
+
+- name: Unarchive IGV
+  unarchive:
+    src: "/home/{{ ATMOUSERNAME }}/IGV_{{ VERSION }}.zip"
+    dest: "/home/{{ ATMOUSERNAME }}"
+    remote_src: yes
+
+- name: Cleanup temporary files
+  file:
+    path: "{{ item }}"
+    state: absent
+  with_items:
+    - "/home/{{ ATMOUSERNAME }}/IGV_{{ VERSION }}.zip"
